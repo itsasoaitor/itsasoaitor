@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Asistencia - Boda</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <style>
+        body, html {
+            height: 100%;
+            font-family: 'Arial', sans-serif;
+        }
+        .bg-image {
+            background-image: url('DSC05388.png');
+            min-height: 100vh;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            position: relative;
+        }
+        .overlay {
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow-y: auto;
+            padding: 40px 20px;
+            min-height: 100vh;
+            width: 100%;
+        }
+        .form-container {
+            background-color: #fffff7;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 600px;
+            opacity: 90%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-image">
+    <div class="overlay">
+        <div class="form-container">
+            <h2 class="mb-4 text-center">Confirmación de Asistencia<br><strong>Itsaso eta Aitor</strong></h2>
+            <form id="rsvp-form">
+                <div id="form-invitados">
+                    <div class="invitado">
+                        <div class="remove-btn d-none">
+                            <button type="button" class="btn btn-danger btn-sm remove-invitado">Eliminar</button>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nombre y Apellidos</label>
+                            <input type="text" class="form-control nombre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Correo Electrónico</label>
+                            <input type="email" class="form-control email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">¿Asistirás a la ceremonia?</label>
+                            <select class="form-select asistenci_ceremonia" required>
+                                <option value="Sí">Sí, asistiré</option>
+                                <option value="No">No podré asistir</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">¿Asistirás al convite?</label>
+                            <select class="form-select asistenci_convite" required>
+                                <option value="Sí">Sí, asistiré</option>
+                                <option value="No">No podré asistir</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">¿Asistirás a la postfiesta? (será en otro lugar)</label>
+                            <select class="form-select asistenci_postfiesta" required>
+                                <option value="Sí">Sí, asistiré</option>
+                                <option value="No">No podré asistir</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Alergias e intolerancias (opcional)</label>
+                            <input type="text" class="form-control alergias">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mensaje (opcional)</label>
+                            <textarea class="form-control mensaje" rows="3"></textarea>
+                        </div>
+                        <hr>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary mb-3" id="add-invitado">Añadir otro invitado</button>
+                <button type="submit" class="btn btn-primary w-100" style="background-color: #6e6d5b;">Confirmar</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwXhS7GbpZAQN082AOFAmvJUC-uMX8bGgARJzqn0e_1o1_xNotQS8B2nHCTRaz0ALmNgw/exec';
+
+    const formTemplate = document.querySelector('.invitado').cloneNode(true);
+
+    document.getElementById('add-invitado').addEventListener('click', function() {
+        const nuevoInvitado = formTemplate.cloneNode(true);
+        nuevoInvitado.querySelectorAll('input, textarea, select').forEach(campo => campo.value = '');
+        nuevoInvitado.querySelector('.remove-btn').classList.remove('d-none');
+        nuevoInvitado.querySelector('.remove-invitado').addEventListener('click', function() {
+            nuevoInvitado.remove();
+        });
+        document.getElementById('form-invitados').appendChild(nuevoInvitado);
+    });
+
+    document.getElementById('rsvp-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const invitados = document.querySelectorAll('.invitado');
+        invitados.forEach(invitado => {
+            const formData = new FormData();
+            formData.append('nombre', invitado.querySelector('.nombre').value);
+            formData.append('email', invitado.querySelector('.email').value);
+            formData.append('ceremonia', invitado.querySelector('.asistenci_ceremonia').value);
+            formData.append('convite', invitado.querySelector('.asistenci_convite').value);
+            formData.append('postfiesta', invitado.querySelector('.asistenci_postfiesta').value);
+            formData.append('alergias', invitado.querySelector('.alergias').value);
+            formData.append('mensaje', invitado.querySelector('.mensaje').value);
+
+            fetch(scriptURL, { method: 'POST', body: formData })
+                .then(response => console.log('Enviado:', response))
+                .catch(error => console.error('Error:', error));
+        });
+
+        alert('¡Tus respuestas han sido enviadas correctamente!');
+        document.getElementById('rsvp-form').reset();
+        document.getElementById('form-invitados').innerHTML = '';
+        document.getElementById('form-invitados').appendChild(formTemplate.cloneNode(true));
+    });
+</script>
+
+</body>
+</html>
